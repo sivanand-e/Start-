@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retail Revenue Forecaster</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg     : #0a0a0f;
+    --surface: #12121a;
+    --card   : #1a1a26;
+    --border : #2a2a3d;
+    --accent : #00e5ff;
+    --accent2: #7c4dff;
+    --accent3: #00e676;
+    --text   : #e8e8f0;
+    --muted  : #6b6b8a;
+    --danger : #ff4757;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'Syne', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(0,229,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none; z-index: 0;
+  }
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 24px;
+    position: relative; z-index: 1;
+  }
+  header {
+    text-align: center;
+    margin-bottom: 60px;
+    animation: fadeDown 0.8s ease;
+  }
+  .badge {
+    display: inline-block;
+    background: linear-gradient(135deg,
+      rgba(0,229,255,0.15), rgba(124,77,255,0.15));
+    border: 1px solid rgba(0,229,255,0.3);
+    color: var(--accent);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px; letter-spacing: 3px;
+    padding: 6px 16px; border-radius: 20px;
+    margin-bottom: 20px; text-transform: uppercase;
+  }
+  h1 {
+    font-size: clamp(2.2rem, 5vw, 3.8rem);
+    font-weight: 800; line-height: 1.1;
+    background: linear-gradient(135deg,
+      #fff 0%, var(--accent) 50%, var(--accent2) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text; margin-bottom: 16px;
+  }
+  .subtitle { color: var(--muted); font-size: 1rem; }
+  .stats-bar {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px; margin-bottom: 48px;
+    max-width: 500px;
+    margin-left: auto; margin-right: auto;
+    animation: fadeUp 0.8s ease 0.2s both;
+  }
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px; padding: 20px 24px;
+    text-align: center;
+    position: relative; overflow: hidden;
+  }
+  .stat-card::before {
+    content: ''; position: absolute;
+    top:0; left:0; right:0; height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+  }
+  .stat-value {
+    font-size: 2rem; font-weight: 800;
+    color: var(--accent);
+    font-family: 'DM Mono', monospace;
+  }
+  .stat-label {
+    font-size: 0.75rem; color: var(--muted);
+    letter-spacing: 1px; text-transform: uppercase;
+    margin-top: 4px;
+  }
+  .section-title {
+    font-size: 0.7rem; letter-spacing: 4px;
+    text-transform: uppercase; color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    margin-bottom: 16px; margin-top: 48px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .prediction-panel {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px; margin-bottom: 16px;
+    animation: fadeUp 0.8s ease 0.4s both;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px; padding: 28px;
+  }
+  .card-title {
+    font-size: 0.72rem; letter-spacing: 3px;
+    text-transform: uppercase; color: var(--muted);
+    margin-bottom: 20px;
+    font-family: 'DM Mono', monospace;
+  }
+  .form-group { margin-bottom: 16px; }
+  label {
+    display: block; font-size: 0.78rem;
+    color: var(--muted); letter-spacing: 1px;
+    text-transform: uppercase; margin-bottom: 7px;
+  }
+  input, select {
+    width: 100%; background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px; padding: 11px 14px;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85rem; outline: none;
+    transition: all 0.2s;
+  }
+  input:focus, select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(0,229,255,0.1);
+  }
+  select option { background: var(--surface); }
+  .row-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .predict-btn {
+    width: 100%;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border: none; border-radius: 12px;
+    padding: 14px; color: #000;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.95rem; font-weight: 700;
+    letter-spacing: 1px; cursor: pointer;
+    transition: all 0.3s; margin-top: 8px;
+    text-transform: uppercase;
+  }
+  .predict-btn.product-btn {
+    background: linear-gradient(135deg, var(--accent3), var(--accent2));
+  }
+  .predict-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(0,229,255,0.3);
+  }
+  .predict-btn:disabled {
+    opacity: 0.6; cursor: not-allowed; transform: none;
+  }
+  .result-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px; padding: 24px;
+    margin-top: 16px; display: none;
+    animation: slideIn 0.4s ease;
+  }
+  .result-box.monthly { border-color: var(--accent); }
+  .result-box.product  { border-color: var(--accent3); }
+  .result-header {
+    font-size: 0.72rem; color: var(--muted);
+    letter-spacing: 2px; text-transform: uppercase;
+    font-family: 'DM Mono', monospace;
+    margin-bottom: 12px;
+  }
+  .result-main {
+    font-family: 'DM Mono', monospace;
+    font-size: 2.2rem; font-weight: 700;
+    color: var(--accent); margin-bottom: 8px;
+  }
+  .result-box.product .result-main {
+    color: var(--accent3);
+  }
+  .result-sub {
+    font-size: 0.85rem; color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .result-pills {
+    display: flex; flex-wrap: wrap; gap: 6px;
+    margin-top: 12px;
+  }
+  .pill {
+    background: rgba(0,229,255,0.08);
+    border: 1px solid rgba(0,229,255,0.2);
+    color: var(--accent);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem; padding: 3px 10px;
+    border-radius: 20px;
+  }
+  .pill.green {
+    background: rgba(0,230,118,0.08);
+    border-color: rgba(0,230,118,0.2);
+    color: var(--accent3);
+  }
+  .pill.purple {
+    background: rgba(124,77,255,0.08);
+    border-color: rgba(124,77,255,0.2);
+    color: var(--accent2);
+  }
+  .loading {
+    display: none; text-align: center;
+    padding: 12px; color: var(--accent);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.82rem; letter-spacing: 2px;
+  }
+  .loading.active { display: block; }
+  .placeholder-text {
+    text-align: center; color: var(--muted);
+    padding: 40px; font-size: 0.9rem;
+  }
+  footer {
+    text-align: center; margin-top: 60px;
+    color: var(--muted); font-size: 0.78rem;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 1px;
+  }
+  @keyframes fadeDown {
+    from { opacity:0; transform:translateY(-30px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+  @keyframes fadeUp {
+    from { opacity:0; transform:translateY(30px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+  @keyframes slideIn {
+    from { opacity:0; transform:translateY(10px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+  @media (max-width: 768px) {
+    .prediction-panel { grid-template-columns: 1fr; }
+    .stats-bar        { grid-template-columns: 1fr 1fr; }
+    .row-2            { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="badge">🤖 ML Powered · Random Forest · R² = 0.91</div>
+    <h1>Retail Revenue<br>Forecaster</h1>
+    <p class="subtitle">
+      Predict monthly total revenue and product revenue
+      using machine learning
+    </p>
+  </header>
+
+  <div class="stats-bar">
+    <div class="stat-card">
+      <div class="stat-value">0.91</div>
+      <div class="stat-label">Revenue R²</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">1M+</div>
+      <div class="stat-label">Transactions</div>
+    </div>
+  </div>
+
+  <!-- Prediction 1 -->
+  <div class="section-title">
+    01 · Monthly Total Revenue Prediction
+  </div>
+
+  <div class="prediction-panel">
+    <div class="card">
+      <div class="card-title">// Input — Monthly Revenue</div>
+
+      <div class="row-2">
+        <div class="form-group">
+          <label>Month</label>
+          <select id="m1_month">
+            {% for i, m in enumerate(months) %}
+            <option value="{{ i+1 }}"
+              {% if i+1 == current_month %}selected{% endif %}>
+              {{ m }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Year</label>
+          <input type="number" id="m1_year"
+                 value="{{ current_year }}"
+                 min="2010" max="2030">
+        </div>
+      </div>
+
+      <button class="predict-btn"
+              onclick="predictMonthly()">
+        ⚡ Predict Monthly Revenue
+      </button>
+      <div class="loading" id="m1_loading">
+        Predicting...
+      </div>
+    </div>
+
+    <div class="card" style="display:flex;
+         flex-direction:column; justify-content:center;">
+      <div id="m1_result" class="result-box monthly">
+        <div class="result-header">
+          Predicted Monthly Total Revenue
+        </div>
+        <div class="result-main" id="m1_revenue">-</div>
+        <div class="result-sub"  id="m1_period">-</div>
+        <div class="result-pills" id="m1_pills"></div>
+      </div>
+      <div id="m1_placeholder" class="placeholder-text">
+        📅 Select month and year to predict total revenue
+      </div>
+    </div>
+  </div>
+
+  <!-- Prediction 2 -->
+  <div class="section-title">
+    02 · Monthly Product Revenue Prediction
+  </div>
+
+  <div class="prediction-panel">
+    <div class="card">
+      <div class="card-title">// Input — Product Revenue</div>
+
+      <div class="row-2">
+        <div class="form-group">
+          <label>Month</label>
+          <select id="m2_month">
+            {% for i, m in enumerate(months) %}
+            <option value="{{ i+1 }}"
+              {% if i+1 == current_month %}selected{% endif %}>
+              {{ m }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Year</label>
+          <input type="number" id="m2_year"
+                 value="{{ current_year }}"
+                 min="2010" max="2030">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Product</label>
+        <select id="m2_product">
+          {% for product in products %}
+          <option value="{{ product.id }}">
+            {{ product.name }}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Unit Price (£)</label>
+        <input type="number" id="m2_price"
+               placeholder="e.g. 2.95"
+               step="0.01" min="0.01" value="2.95">
+      </div>
+
+      <button class="predict-btn product-btn"
+              onclick="predictProduct()">
+        🎯 Predict Product Revenue
+      </button>
+      <div class="loading" id="m2_loading">
+        Predicting...
+      </div>
+    </div>
+
+    <div class="card" style="display:flex;
+         flex-direction:column; justify-content:center;">
+      <div id="m2_result" class="result-box product">
+        <div class="result-header">
+          Predicted Monthly Product Revenue
+        </div>
+        <div class="result-main" id="m2_revenue">-</div>
+        <div class="result-sub"  id="m2_product_name">-</div>
+        <div class="result-sub"  id="m2_period">-</div>
+        <div class="result-pills" id="m2_pills"></div>
+      </div>
+      <div id="m2_placeholder" class="placeholder-text">
+        📦 Select product details to predict product revenue
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    Built with Flask · Random Forest · Online Retail II ·
+    Revenue R² = 0.9120
+  </footer>
+
+</div>
+
+<script>
+async function predictMonthly() {
+  const btn  = document.querySelector('.predict-btn')
+  const load = document.getElementById('m1_loading')
+  const res  = document.getElementById('m1_result')
+  const ph   = document.getElementById('m1_placeholder')
+
+  const month = document.getElementById('m1_month').value
+  const year  = document.getElementById('m1_year').value
+
+  btn.disabled = true
+  load.classList.add('active')
+
+  try {
+    const r    = await fetch('/predict_monthly', {
+      method : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body   : JSON.stringify({ month, year })
+    })
+    const data = await r.json()
+
+    if (data.success) {
+      document.getElementById('m1_revenue').textContent =
+        '£' + data.monthly_revenue.toLocaleString()
+      document.getElementById('m1_period').textContent =
+        data.month_name + ' ' + data.year
+
+      const pills = document.getElementById('m1_pills')
+      pills.innerHTML = ''
+      addPill(pills, data.season,              'purple')
+      addPill(pills, data.month_name + ' ' + data.year)
+      addPill(pills, 'All Products',           'green')
+
+      ph.style.display  = 'none'
+      res.style.display = 'block'
+    } else {
+      alert('Error: ' + data.error)
+    }
+  } catch(e) {
+    alert('Connection error: ' + e.message)
+  }
+
+  btn.disabled = false
+  load.classList.remove('active')
+}
+
+async function predictProduct() {
+  const btn  = document.querySelector('.product-btn')
+  const load = document.getElementById('m2_loading')
+  const res  = document.getElementById('m2_result')
+  const ph   = document.getElementById('m2_placeholder')
+
+  const month   = document.getElementById('m2_month').value
+  const year    = document.getElementById('m2_year').value
+  const product = document.getElementById('m2_product').value
+  const price   = document.getElementById('m2_price').value
+
+  if (!price) { alert('Please enter unit price!'); return }
+
+  btn.disabled = true
+  load.classList.add('active')
+
+  try {
+    const r    = await fetch('/predict_product', {
+      method : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body   : JSON.stringify({
+        month, year,
+        product_encoded: product,
+        price
+      })
+    })
+    const data = await r.json()
+
+    if (data.success) {
+      document.getElementById('m2_revenue').textContent =
+        '£' + data.monthly_product_revenue.toLocaleString()
+      document.getElementById('m2_product_name').textContent =
+        data.product_name
+      document.getElementById('m2_period').textContent =
+        data.month_name + ' ' + data.year
+
+      const pills = document.getElementById('m2_pills')
+      pills.innerHTML = ''
+      addPill(pills, data.season,                      'purple')
+      addPill(pills, '~' + data.predicted_qty + ' units/day')
+      addPill(pills, 'All Countries',                  'green')
+
+      ph.style.display  = 'none'
+      res.style.display = 'block'
+    } else {
+      alert('Error: ' + data.error)
+    }
+  } catch(e) {
+    alert('Connection error: ' + e.message)
+  }
+
+  btn.disabled = false
+  load.classList.remove('active')
+}
+
+function addPill(container, text, cls='') {
+  const p       = document.createElement('span')
+  p.className   = 'pill ' + cls
+  p.textContent = text
+  container.appendChild(p)
+}
+</script>
+</body>
+</html>
