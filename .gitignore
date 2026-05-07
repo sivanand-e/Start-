@@ -1,2 +1,5 @@
 venv
 retail_clean_final.csv
+*.csv
+*png
+*.pkl
