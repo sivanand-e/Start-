@@ -171,7 +171,7 @@
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 14px; padding: 24px;
-    margin-top: 16px; display: none;
+    display: none;
     animation: slideIn 0.4s ease;
   }
   .result-box.monthly { border-color: var(--accent); }
@@ -283,7 +283,6 @@
   <div class="prediction-panel">
     <div class="card">
       <div class="card-title">// Input — Monthly Revenue</div>
-
       <div class="row-2">
         <div class="form-group">
           <label>Month</label>
@@ -303,22 +302,16 @@
                  min="2010" max="2030">
         </div>
       </div>
-
-      <button class="predict-btn"
-              onclick="predictMonthly()">
+      <button class="predict-btn" onclick="predictMonthly()">
         ⚡ Predict Monthly Revenue
       </button>
-      <div class="loading" id="m1_loading">
-        Predicting...
-      </div>
+      <div class="loading" id="m1_loading">Predicting...</div>
     </div>
 
     <div class="card" style="display:flex;
          flex-direction:column; justify-content:center;">
       <div id="m1_result" class="result-box monthly">
-        <div class="result-header">
-          Predicted Monthly Total Revenue
-        </div>
+        <div class="result-header">Predicted Monthly Total Revenue</div>
         <div class="result-main" id="m1_revenue">-</div>
         <div class="result-sub"  id="m1_period">-</div>
         <div class="result-pills" id="m1_pills"></div>
@@ -337,7 +330,6 @@
   <div class="prediction-panel">
     <div class="card">
       <div class="card-title">// Input — Product Revenue</div>
-
       <div class="row-2">
         <div class="form-group">
           <label>Month</label>
@@ -357,7 +349,6 @@
                  min="2010" max="2030">
         </div>
       </div>
-
       <div class="form-group">
         <label>Product</label>
         <select id="m2_product">
@@ -368,21 +359,17 @@
           {% endfor %}
         </select>
       </div>
-
       <div class="form-group">
         <label>Unit Price (£)</label>
         <input type="number" id="m2_price"
                placeholder="e.g. 2.95"
                step="0.01" min="0.01" value="2.95">
       </div>
-
       <button class="predict-btn product-btn"
               onclick="predictProduct()">
         🎯 Predict Product Revenue
       </button>
-      <div class="loading" id="m2_loading">
-        Predicting...
-      </div>
+      <div class="loading" id="m2_loading">Predicting...</div>
     </div>
 
     <div class="card" style="display:flex;
@@ -438,9 +425,9 @@ async function predictMonthly() {
 
       const pills = document.getElementById('m1_pills')
       pills.innerHTML = ''
-      addPill(pills, data.season,              'purple')
+      addPill(pills, data.season,                      'purple')
       addPill(pills, data.month_name + ' ' + data.year)
-      addPill(pills, 'All Products',           'green')
+      addPill(pills, 'All Products',                   'green')
 
       ph.style.display  = 'none'
       res.style.display = 'block'

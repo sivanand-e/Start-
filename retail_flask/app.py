@@ -3,7 +3,6 @@ import joblib
 import pandas as pd
 import numpy as np
 from datetime import datetime
-
 import os
 
 app = Flask(__name__)
@@ -121,7 +120,6 @@ def predict_product():
 
         # Predict for each country and sum
         total_predicted_qty = 0
-
         for country_name, country_code in COUNTRY_MAP.items():
             input_df = pd.DataFrame([{
                 'Description_Encoded': description_encoded,
@@ -135,11 +133,9 @@ def predict_product():
                 'WeekOfYear'         : min(52, month * 4),
                 'Price'              : price
             }])
-
             qty = max(0, model.predict(input_df)[0])
             total_predicted_qty += qty
 
-        # Total monthly product revenue across all countries
         seasonal_factor         = SEASONAL.get(month, 1.0)
         monthly_product_revenue = round(
             total_predicted_qty * price
@@ -160,5 +156,4 @@ def predict_product():
         return jsonify({'success': False, 'error': str(e)})
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port, debug=True)  # ← change to True
+    app.run(debug=True, host='0.0.0.0', port=5000)
