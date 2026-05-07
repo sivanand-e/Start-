@@ -4,3 +4,4 @@ xgboost
 joblib
 flask
 scikit-learn==1.4.2
+gunicorn
